@@ -5,7 +5,7 @@ from miproxy.proxy import ProxyHandler, MitmProxy, AsyncMitmProxy
 import argparse
 from httplib import HTTPResponse
 from Cookie import SimpleCookie
-from doc_HttpRequestResponse import DocHTTPRequestResponse
+from doc_HttpRequestResponse import HTTPRequestResponse
 from StringIO import StringIO
 from SocketServer import ForkingMixIn
 from BaseHTTPServer import BaseHTTPRequestHandler
@@ -26,9 +26,9 @@ class WASEProxyHandler(ProxyHandler):
 	# Initialize ES connection and index
 	res = connections.create_connection(hosts=[args.elasticsearch])
 	idx = Index(args.index)
-	idx.doc_type(DocHTTPRequestResponse)
+	idx.doc_type(HTTPRequestResponse)
 	try:
-	    DocHTTPRequestResponse.init()
+	    HTTPRequestResponse.init()
 	    idx.create()
 	except:
 	    pass
@@ -48,7 +48,7 @@ class WASEProxyHandler(ProxyHandler):
         if args.verbose:
             print(url)
 
-        self.doc = DocHTTPRequestResponse(host=self.hostname, port=int(self.port), protocol=scheme)
+        self.doc = HTTPRequestResponse(host=self.hostname, port=int(self.port), protocol=scheme)
         self.doc.meta.index = args.index
         self.doc.request.url = url
         self.doc.request.requestline = r.requestline

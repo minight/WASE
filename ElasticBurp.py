@@ -20,7 +20,7 @@ from java.awt import Dimension
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl import Index
 from elasticsearch.helpers import bulk
-from doc_HttpRequestResponse import DocHTTPRequestResponse
+from doc_HttpRequestResponse import HTTPRequestResponse
 from datetime import datetime
 from email.utils import parsedate_tz, mktime_tz
 from tzlocal import get_localzone
@@ -33,7 +33,7 @@ except:
 reDateHeader = re.compile("^Date:\s*(.*)$", flags=re.IGNORECASE)
 
 ### Config (TODO: move to config tab) ###
-ES_host = "localhost"
+ES_host = "southpole"
 ES_index = "wase-burp"
 Burp_Tools = IBurpExtenderCallbacks.TOOL_PROXY
 Burp_onlyResponses = True       # Usually what you want, responses also contain requests
@@ -52,7 +52,7 @@ class BurpExtender(IBurpExtender, IHttpListener, IContextMenuFactory, ITab):
         self.confESHost = self.callbacks.loadExtensionSetting("elasticburp.host") or ES_host
         self.confESIndex = self.callbacks.loadExtensionSetting("elasticburp.index") or ES_index
         self.confBurpTools = int(self.callbacks.loadExtensionSetting("elasticburp.tools") or Burp_Tools)
-        saved_onlyresp = self.callbacks.loadExtensionSetting("elasticburp.onlyresp") 
+        saved_onlyresp = self.callbacks.loadExtensionSetting("elasticburp.onlyresp")
         if saved_onlyresp == "True":
             self.confBurpOnlyResp = True
         elif saved_onlyresp == "False":
@@ -68,10 +68,11 @@ class BurpExtender(IBurpExtender, IHttpListener, IContextMenuFactory, ITab):
             print("Connecting to '%s', index '%s'" % (self.confESHost, self.confESIndex))
             self.es = connections.create_connection(hosts=[self.confESHost])
             self.idx = Index(self.confESIndex)
-            self.idx.doc_type(DocHTTPRequestResponse)
+            self.idx.doc_type(HTTPRequestResponse)
             if self.idx.exists():
                 self.idx.open()
             else:
+                print("creating index")
                 self.idx.create()
             self.callbacks.saveExtensionSetting("elasticburp.host", self.confESHost)
             self.callbacks.saveExtensionSetting("elasticburp.index", self.confESIndex)
@@ -79,6 +80,7 @@ class BurpExtender(IBurpExtender, IHttpListener, IContextMenuFactory, ITab):
             self.callbacks.saveExtensionSetting("elasticburp.onlyresp", str(int(self.confBurpOnlyResp)))
         except Exception as e:
             JOptionPane.showMessageDialog(self.panel, "<html><p style='width: 300px'>Error while initializing ElasticSearch: %s</p></html>" % (str(e)), "Error", JOptionPane.ERROR_MESSAGE)
+            print(e)
 
     ### ITab ###
     def getTabCaption(self):
@@ -212,7 +214,7 @@ class BurpExtender(IBurpExtender, IHttpListener, IContextMenuFactory, ITab):
     ### Interface to ElasticSearch ###
     def genESDoc(self, msg, timeStampFromResponse=False):
         httpService = msg.getHttpService()
-        doc = DocHTTPRequestResponse(protocol=httpService.getProtocol(), host=httpService.getHost(), port=httpService.getPort())
+        doc = HTTPRequestResponse(protocol=httpService.getProtocol(), host=httpService.getHost(), port=httpService.getPort())
         doc.meta.index = self.confESIndex
 
         request = msg.getRequest()
@@ -249,7 +251,7 @@ class BurpExtender(IBurpExtender, IHttpListener, IContextMenuFactory, ITab):
                     typename = "json"
                 else:
                     typename = "unknown"
-                
+
                 name = parameter.getName()
                 value = parameter.getValue()
                 doc.add_request_parameter(typename, name, value)

@@ -1,4 +1,4 @@
-from doc_HttpRequestResponse import DocHTTPRequestResponse
+from doc_HttpRequestResponse import HTTPRequestResponse
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl import Index
 from datetime import datetime
@@ -6,12 +6,12 @@ from datetime import datetime
 connections.create_connection(hosts=["localhost"])
 
 idx = Index("test")
-idx.doc_type(DocHTTPRequestResponse)
+idx.doc_type(HTTPRequestResponse)
 #idx.create()
 
-DocHTTPRequestResponse.init()
+HTTPRequestResponse.init()
 
-d = DocHTTPRequestResponse(
+d = HTTPRequestResponse(
         protocol="http",
         host="foobar.com",
         port=80
@@ -28,7 +28,7 @@ d.response.body = "This is a test!"
 d.request.method = "GET"
 d.save()
 
-d = DocHTTPRequestResponse(
+d = HTTPRequestResponse(
         protocol="http",
         host="foobar.com",
         port=80
@@ -43,7 +43,7 @@ d.request.method = "GET"
 d.response.body = "This is a test!"
 d.save()
 
-d = DocHTTPRequestResponse(
+d = HTTPRequestResponse(
         protocol="http",
         host="foobar.com",
         port=80
@@ -60,7 +60,7 @@ d.request.method = "POST"
 d.response.body = "Added!"
 d.save()
 
-d = DocHTTPRequestResponse(
+d = HTTPRequestResponse(
         protocol="http",
         host="foobar.com",
         port=80

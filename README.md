@@ -6,7 +6,7 @@ and aggregated with ElasticSearch queries or with Kibana.
 
 Currently WASE contains the following parts:
 
-* doc\_HttpRequestResponse.py: a library that implements the DocHTTPRequestResponse class. This class is an
+* doc\_HttpRequestResponse.py: a library that implements the HTTPRequestResponse class. This class is an
   elasticsearch\_dsl-based storage class of HTTP requests/responses (derived from Burps data structures and API).
 * ElasticBurp: a Burp plugin that feeds requests/responses into ElasticSearch.
 

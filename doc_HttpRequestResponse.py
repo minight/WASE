@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from elasticsearch_dsl import DocType, Text, Keyword, Integer, Short, Date, Object, Nested, MetaField, analyzer
+from elasticsearch_dsl import DocType, Text, Keyword, Integer, Short, Date, Object, Nested, MetaField, analyzer, Index, Document
 from datetime import datetime
 import re
 from WASEHTMLParser import WASEHTMLParser
@@ -41,9 +41,9 @@ identifierAnalyzer = analyzer("identifier",
         filter = ["lowercase"]
         )
 
-class DocHTTPRequestResponse(DocType):
-    class Meta:
-        doc_type = 'HTTPRequestResponse'
+class HTTPRequestResponse(Document):
+    class Index:
+        name="wase-burp"
 
     timestamp = Date()
     protocol = Keyword()
@@ -70,7 +70,7 @@ class DocHTTPRequestResponse(DocType):
                         'value': Text(fields={'keyword': Keyword()})
                         }
                     ),
-                'body': Text(include_in_all=False)
+                'body': Text(),
                 }
             )
     response = Object(
@@ -96,7 +96,7 @@ class DocHTTPRequestResponse(DocType):
                         'value': Text(fields={'keyword': Keyword()})
                         }
                     ),
-                'body': Text(include_in_all=False),
+                'body': Text(),
                 'doctype': Text(multi=True, fields={'keyword': Keyword()}),
                 'base': Text(multi=True, fields={'keyword': Keyword()}),
                 'stylesheets': Text(multi=True, fields={'keyword': Keyword()}),
@@ -163,4 +163,4 @@ class DocHTTPRequestResponse(DocType):
 
         if not storeResponseBody:
             self.response.body = None
-        return super(DocHTTPRequestResponse, self).save(**kwargs)
+        return super(HTTPRequestResponse, self).save(**kwargs)
